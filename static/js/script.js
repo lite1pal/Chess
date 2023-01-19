@@ -1,74 +1,60 @@
-const takenSquares = ["a-1", "b-1", "c-1", "d-1", "e-1", "g-1", "f-1", "h-1", "a-2", "b-2", "c-2", "d-2", "e-2", "g-2", "f-2", "h-2"];
-let highlightedFigure = "";
-let colorOfHighlightedFigure = "";
+let clickedFigure = "";
+let nameOfFigure = "";
+let isSomeFigureClicked = false;
+let availableMove = "";
 
-// checks if the figure is already highlighted and if it is not, changes the previous figure's color to the default one
-const checksIfFigureIsHighlighted = function (parentOfTarget) {
-    if (highlightedFigure.id !== parentOfTarget.id && parentOfTarget.id !== "board" && highlightedFigure !== "") {
-        highlightedFigure.style.backgroundColor = "";
-    }
-}
+document.querySelector("#board").addEventListener("click", function (e) {
 
-const highlightsClickedFigure = function (event) {
-    try {
-        // will check if there is a figure on the square
-        let parentOfTarget = document.getElementById(event.target.parentNode.id);
-        // highlightes the picked figure
-        if (parentOfTarget.classList[0].slice(0, 6) === "column") {
-            checksIfFigureIsHighlighted(parentOfTarget);
-            // sets the clicked figure into the highlightedFigure variable
-            highlightedFigure = document.getElementById(parentOfTarget.id);
-        
-            //gets the backgroundColor of highlighted figure in order to set this color back when the figure is no longer highlighted
-            colorOfHighlightedFigure = getComputedStyle(highlightedFigure).backgroundColor;
-        
-            // changes the color of the clicked figure
-            document.getElementById(parentOfTarget.id).style.backgroundColor = "yellow";
-            }
-    }
-    catch (error) {
-        console.log(error);
-    }
-}
+    // loops through squares to find taken ones
+    const squaresWithFigures = [];
+    const squaresWithoutFigures = [];
 
-const movesFigure = function (event) {
-    
-    const clickedSquare = document.getElementById(event.target.id);
-
-    if (clickedSquare && !takenSquares.includes(clickedSquare.id)) {
-        if (highlightedFigure) {
-            clickedSquare.innerHTML = highlightedFigure.innerHTML;
-            delete takenSquares[takenSquares.indexOf(highlightedFigure.id)];
-            takenSquares.push(clickedSquare.id);
-            // console.log(takenSquares);
-            highlightedFigure.innerHTML = "";
-            highlightedFigure.style.backgroundColor = "";
+    for (element of document.getElementsByClassName("square")) {
+        if (element.innerHTML.includes("img")) {
+            squaresWithFigures.push(element.id);
+        }
+        else {
+            squaresWithoutFigures.push(element.id);
         }
     }
-}
 
+    const movingOnAvailableSquares = function () {
+        if (e.target.id === availableMove) {
+            document.getElementById(clickedFigure).style.backgroundColor = "";
+            document.getElementById(e.target.id).innerHTML = document.getElementById(clickedFigure).innerHTML;
+            document.getElementById(clickedFigure).innerHTML = "";
+            document.getElementById(availableMove).style.backgroundColor = "";
+        }
+    }
 
-document.getElementById("squares").addEventListener("click", highlightsClickedFigure);
-document.getElementById("squares").addEventListener("click", movesFigure);
+    // manages highlighting
+    if (squaresWithFigures.includes(e.target.parentNode.id)) {
+        // removes highlighting from the previous figure if the clicked figure is different
+        if (clickedFigure && clickedFigure !== e.target.parentNode) {
+            document.getElementById(clickedFigure).style.backgroundColor = "";
+            document.getElementById(availableMove).style.backgroundColor = "";
+        }
 
+        // highlights figure if it was clicked
+        clickedFigure = e.target.parentNode.id;
+        nameOfFigure = e.target.id;
+        document.getElementById(clickedFigure).style.backgroundColor = "red";
 
-        // if (highlightedFigure !== currentFigure) {
-        //     if (document.getElementById(currentFigure).innerHTML) {
-        //         document.getElementById(currentFigure).style.backgroundColor = 'yellow';
-        //     }
-        //     if (highlightedFigure) {
-        // colorOfHighlightedFigure = getComputedStyle(document.getElementsByClassName(document.getElementById(highlightedFigure).classList[0])[0]).backgroundColor;
-        //         console.log(getComputedStyle(document.getElementsByClassName(document.getElementById(highlightedFigure).classList[0])[0]).backgroundColor);
-        //         document.getElementById(highlightedFigure).style.backgroundColor = colorOfHighlightedFigure;
-        //     }
-    
+        switch (e.target.id) {
+            case "w-pawn":
+                availableMove = e.target.parentNode.id.slice(0, 2) + (parseInt(e.target.parentNode.id[2]) + 1).toString();
+                document.getElementById(availableMove).style.backgroundColor = "green";
+        }
 
-    // changes location of the figure
-    // else {
-    //     if (currentFigure) {
-    //         currentTarget.innerHTML = document.getElementById(currentFigure).innerHTML;
-    //         document.getElementById(highlightedFigure).style.backgroundColor = colorOfHighlightedFigure;
-    //         document.getElementById(currentFigure).innerHTML = "";
+        isSomeFigureClicked = true;
+    }
 
-    //     }
-    // })
+    // manages moving on the free squares
+    else if (isSomeFigureClicked && e.target.id !== "board") {
+        switch (nameOfFigure) {
+            case "w-pawn":
+                movingOnAvailableSquares();
+                break;
+        }
+    }
+})
