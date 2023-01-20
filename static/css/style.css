@@ -36,3 +36,9 @@ body {
     display: table-cell;
     vertical-align: middle;
 }
+
+#side {
+    text-align: center;
+    font-size: x-large;
+
+}
