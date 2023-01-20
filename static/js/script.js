@@ -5,6 +5,7 @@ let availableMovesY = [];
 let availableMoveX = "";
 let doubleMovePawn = "";
 let singleMovePawn = "";
+let whoseMove = "w";
 
 const charsInNumbers = {
     "a": 1,
@@ -31,6 +32,7 @@ document.querySelector("#board").addEventListener("click", function (e) {
         }
     }
 
+    // functions
     const movingOnAvailableSquares = function () {
         if (availableMovesY.includes(e.target.id)) {
             document.getElementById(clickedFigure).style.backgroundColor = "";
@@ -96,7 +98,6 @@ document.querySelector("#board").addEventListener("click", function (e) {
             case "w-pawn":
                 controlsPawnFirstMove(2, 1, 2, "9");
                 removesAvailableMoveWithFigureOnIt();
-
                 break;
             case "b-pawn":
                 controlsPawnFirstMove(-2, -1, 7, "0");
@@ -108,14 +109,20 @@ document.querySelector("#board").addEventListener("click", function (e) {
     }
     // manages moving on the free squares
     else if (isSomeFigureClicked && e.target.id !== "board") {
+        console.log(whoseMove)
+        console.log(nameOfFigure)
         switch (nameOfFigure) {
             case "w-pawn":
-
-                movingOnAvailableSquares();
+                if (whoseMove === "w") {
+                    movingOnAvailableSquares();
+                    whoseMove = "b";
+                }
                 break;
             case "b-pawn":
-
-                movingOnAvailableSquares();
+                if (whoseMove === "b") {
+                    movingOnAvailableSquares();
+                    whoseMove = "w";
+                }
                 break;
         }
         isSomeFigureClicked = false;
