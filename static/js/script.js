@@ -121,7 +121,6 @@ document.querySelector("#board").addEventListener("click", function (e) {
     const controlsKnightMove = function () {
         knightMoves = [getMoveKnight(-1, 2), getMoveKnight(-2, 1), getMoveKnight(1, 2), getMoveKnight(2, 1), getMoveKnight(-1, -2), getMoveKnight(1, -2), getMoveKnight(-2, -1), getMoveKnight(2, -1)];
         for (move of knightMoves) {
-            console.log(move)
             if (!squaresWithFigures.includes(move) && squaresWithoutFigures.includes(move)) {
                 availableMovesY.push(move);
             }
@@ -159,6 +158,13 @@ document.querySelector("#board").addEventListener("click", function (e) {
             case "w-knight":
                 controlsKnightMove();
                 removesAvailableMoveWithFigureOnIt();
+                break;
+            case "b-knight":
+                controlsKnightMove();
+                removesAvailableMoveWithFigureOnIt();
+                break;
+            case "w-rook":
+                console.log("in progress...");
         }
         isSomeFigureClicked = true;
     }
@@ -179,14 +185,17 @@ document.querySelector("#board").addEventListener("click", function (e) {
                 break;
             case "w-knight":
                 if (whoseMove === "w") {
-                    movingOnAvailableSquares()
+                    movingOnAvailableSquares();
+                    changesMoveSide(whoseMove);
+                }
+                break;
+            case "b-knight":
+                if (whoseMove === "b") {
+                    movingOnAvailableSquares();
                     changesMoveSide(whoseMove);
                 }
                 break;
         }
         isSomeFigureClicked = false;
-        console.log(whoseMove)
     }
 })
-
-
