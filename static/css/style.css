@@ -5,9 +5,10 @@ body {
 }
 
 .chessboard {
+    float: left;
     width: 640px;
     height: 640px;
-    margin: 20px;
+    margin: 30px;
     border: 15px solid #000;
     border-radius: 10px;
     background: #e59110;
@@ -38,7 +39,7 @@ body {
 }
 
 #side {
-    text-align: center;
+    float: left;
     font-size: x-large;
 
 }
