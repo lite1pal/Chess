@@ -10,6 +10,8 @@ let charInNumber = 0;
 let knightMoves = [];
 let moveKnightX = "";
 let moveKnightY = "";
+let attackingMoves = [];
+let rookMovesY = [];
 
 const charsInNumbers = {
     "a": 1,
@@ -59,6 +61,7 @@ document.querySelector("#board").addEventListener("click", function (e) {
             }
         }
         availableMoves = [];
+        attackingMoves = [];
     }
 
     const changeElementColorById = function (id, color = "") {
@@ -66,14 +69,17 @@ document.querySelector("#board").addEventListener("click", function (e) {
     }
 
     const movingOnAvailableSquares = function () {
-        if (availableMoves.includes(e.target.id)) {
+        if (availableMoves.includes(e.target.id) || attackingMoves.includes(e.target.parentNode.id)) {
 
             // moves the figure and removes it from the previous square
-            changeElementColorById(clickedFigure);
-            document.getElementById(e.target.id).innerHTML = document.getElementById(clickedFigure).innerHTML;
+            if (attackingMoves.includes(e.target.parentNode.id)) {
+                document.getElementById(e.target.parentNode.id).innerHTML = document.getElementById(clickedFigure).innerHTML;
+            }
+            else {
+                document.getElementById(e.target.id).innerHTML = document.getElementById(clickedFigure).innerHTML;
+            }
             document.getElementById(clickedFigure).innerHTML = "";
             clickedFigure = "";
-
             // removes all available moves since the move was done
             for (move of availableMoves) {
                 if (move) {
@@ -168,18 +174,92 @@ document.querySelector("#board").addEventListener("click", function (e) {
         knightMoves = [getMoveKnight(-1, 2), getMoveKnight(-2, 1), getMoveKnight(1, 2), getMoveKnight(2, 1), getMoveKnight(-1, -2), getMoveKnight(1, -2), getMoveKnight(-2, -1), getMoveKnight(2, -1)];
         for (move of knightMoves) {
             if (squaresWithoutFigures.includes(move) || opponent.includes(move)) {
-
+                if (opponent.includes(move)) {
+                    attackingMoves.push(move);
+                }
                 availableMoves.push(move);
             }
         }
     }
 
+    const getMinNumberInArray = function (array) {
+        return array.reduce((a, b) => Math.min(a, b));
+    }
+
+    const getMaxNumberInArray = function (array) {
+        return array.reduce((a, b) => Math.max(a, b));
+    }
+
+    const sortArray = function (array) {
+        return array.sort(function (a, b) {
+            return a - b;
+        });
+    }
+
+    const controlsRookMoveY = function (opponent) {
+        let figuresRookCanBeatY = [];
+        let figureAboveRook = "";
+        let figureBelowRook = "";
+
+        // pushes squares with figures that can be potentially attacked by the rook to figuresRookCanBeat
+        // p.s. it pushes only digits of figure's id
+        for (figure of opponent) {
+            if (figure[0] === clickedFigure[0]) {
+                figuresRookCanBeatY.push(parseInt(figure[2]));
+            }
+        }
+
+        // sorts nums in array from low to high
+        sortArray(figuresRookCanBeatY);
+
+        // finds out for sure figures which can be attacked by the rook
+        for (num of figuresRookCanBeatY) {
+            if (parseInt(clickedFigure[2]) > num) {
+                figureBelowRook = clickedFigure[0] + "-" + num.toString();
+            }
+            else if (parseInt(clickedFigure[2]) < num) {
+                figureAboveRook = clickedFigure[0] + "-" + num.toString();
+                break;
+            }
+        }
+
+        if (figureBelowRook) {
+            availableMoves.push(figureBelowRook);
+            attackingMoves.push(figureBelowRook);
+        }
+
+        if (figureAboveRook) {
+            availableMoves.push(figureAboveRook);
+            attackingMoves.push(figureAboveRook);
+        }
+
+        // adds empty squares between rook and its targets to availableMoves
+        for (move of squaresWithoutFigures) {
+            if (move[0] === clickedFigure[0]) {
+                availableMoves.push(move);
+            }
+        }
+    }
+
+    const controlsRookMoveX = function (opponent) {
+        let figuresRookCanBeatX = [];
+        let figureLeftRook = "";
+        let figureRightRook = "";
+
+        for (figure of opponent) {
+            console.table(figure[2], clickedFigure[2])
+            if (figure[2] === clickedFigure[2]) {
+                figuresRookCanBeatX.push(figure[0]);
+            }
+        }
+
+        console.log(figuresRookCanBeatX);
+    }
     // main
 
     removesHighlightOnPreviousFigure();
-
     // manages highlighting
-    if (squaresWithFigures.includes(e.target.parentNode.id)) {
+    if (squaresWithFigures.includes(e.target.parentNode.id) && attackingMoves.length < 1) {
 
         clearAvailableMoves();
 
@@ -214,14 +294,19 @@ document.querySelector("#board").addEventListener("click", function (e) {
                 }
                 break;
             case "w-rook":
-                console.log("in progress...");
+                if (whoseMove === "w") {
+                    controlsRookMoveY(squaresWithBlackFigures);
+                    controlsRookMoveX(squaresWithBlackFigures);
+                    showsAvailableMoves();
+                }
+                break;
         }
+        // console.log(attackingMoves)
         isSomeFigureClicked = true;
     }
 
     // manages moving on the free squares
     else if (isSomeFigureClicked && e.target.id !== "board") {
-
         switch (nameOfFigure) {
             case "w-pawn":
                 if (whoseMove === "w") {
@@ -247,9 +332,13 @@ document.querySelector("#board").addEventListener("click", function (e) {
                     changesMoveSide(whoseMove);
                 }
                 break;
+            case "w-rook":
+                if (whoseMove === "w") {
+                    movingOnAvailableSquares();
+                    changesMoveSide(whoseMove);
+                }
         }
         clearAvailableMoves();
         isSomeFigureClicked = false;
     }
-    console.log(availableMoves)
 })
